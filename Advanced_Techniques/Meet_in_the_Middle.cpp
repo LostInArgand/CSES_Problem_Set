@@ -1,82 +1,48 @@
-#include <bits/stdc++.h>
 #include <iostream>
-#include <cstdio>
-#include <climits>
-#include <unordered_map>
 #include <cmath>
 #include <vector>
-#include <unordered_set>
+#include <algorithm>
+#include <climits>
+#include <stack>
+#include <set>
+#include <list>
+#include <cstring>
 #include <queue>
 #include <map>
 
-#define MOD 1000000007
-
-typedef long long int ll;
-
+typedef long long ll;
 
 using namespace std;
 
-
-int max(int x, int y){
-    if (x > y){
-        return x;
-    }
-    return y;
-}
-
-int min(int x, int y){
-    if (x <= y){
-        return x;
-    }
-    return y;
-}
-
-ll fastExpo(ll i, ll j, ll mod){
-    ll res = 1;
-    i = i % mod;
-    if(j == 0){
-        return 1;
-    }
-    if(i == 0){
-        return 0;
-    }
-    while (j > 0){
-        if((j & 1) == 1){
-            res = (res * i) % mod;
-        }
-        j >>= 1;
-        i = (i * i) % mod;
-    }
-    return res;
-}
-
-unordered_map<ll, ll> mem;
-ll ans = 0;
-
-void calculate_subsets(const ll *arr, int n, int start, bool mem_type, ll x){
-    mem[0] = 1;
+vector<ll> calculate_subsets(const ll *arr, int n, int start, bool mem_type, ll x){
+    vector<ll> ans;
     for(int i=0; i < (1 << n); i++){
         ll sum = 0L;
         for(int j=0; j < n; j++){
             if(i & (1<<j)) sum += arr[start + j];
         }
-        if(sum == 0) continue;
         if(mem_type){
-            if(mem.count(x - sum)) ans += mem[x - sum];
+            ans.push_back(x - sum);
         }
         else{
-            if(mem.count(sum) == 0) mem[sum] = 0L;
-            mem[sum]++;
+            ans.push_back(sum);
         }
     }
+    return ans;
 }
 
 void solve(const ll *arr, int n, ll x){
-    calculate_subsets(arr, n/2, 0, false, x);
-    calculate_subsets(arr, n - (n / 2), n/2, true, x);
-
-    unordered_map<ll, ll> :: iterator itr;
-    if(mem.count(x)) ans += mem[x];
+    vector<ll> arr1 = calculate_subsets(arr, n/2, 0, false, x);
+    vector<ll> arr2 = calculate_subsets(arr, n - (n / 2), n/2, true, x);
+    sort(arr1.begin(), arr1.end());
+    sort(arr2.begin(), arr2.end());
+    ll ans = 0;
+    for(ll u : arr1){
+        auto low_itr = lower_bound(arr2.begin(), arr2.end(), u);
+        auto high_itr = upper_bound(arr2.begin(), arr2.end(), u);
+        ans += (high_itr - arr2.begin()) - (low_itr - arr2.begin());
+    }
+    cout << ans << endl;
 }
 
 int main() {
@@ -90,7 +56,5 @@ int main() {
         cin >> arr[i];
     }
     solve(arr, n, x);
-    cout << ans << endl;
-
     return 0;
 }
